@@ -2,11 +2,11 @@ pipeline {
     agent none  // No default agent, we will specify Kubernetes agent below
 
     environment {
-        GKE_CLUSTER_NAME = 'your-gke-cluster-name'  // Replace with your GKE cluster name
-        GKE_PROJECT = 'your-gke-project-id'  // Replace with your GKE project ID
+        GKE_CLUSTER_NAME = 'lloyds-cluster-clone-1-clone-1'  // Replace with your GKE cluster name
+        GKE_PROJECT = 'burner-ganprasa2'  // Replace with your GKE project ID
         GKE_ZONE = 'us-central1-a'  // Replace with your GKE cluster zone
-        DOCKER_REGISTRY = 'asia-south1-docker.pkg.dev/your-project-id/your-repository'  // Replace with your Artifact Registry URL
-        DOCKER_IMAGE_NAME = 'your-image-name'  // Replace with your Docker image name
+        DOCKER_REGISTRY = 'us-central1-docker.pkg.dev/burner-ganprasa2/lloyds-repo'  // Replace with your Artifact Registry URL
+        DOCKER_IMAGE_NAME = 'first-image'  // Replace with your Docker image name
     }
 
     stages {
