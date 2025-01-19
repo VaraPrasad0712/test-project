@@ -1,12 +1,12 @@
 pipeline {
-    agent none
+    agent none  // No default agent, we will specify Kubernetes agent below
 
     environment {
-        GKE_CLUSTER_NAME = 'your-gke-cluster-name'  
-        GKE_PROJECT = 'your-gke-project-id'  
-        GKE_ZONE = 'us-central1-a'  
-        DOCKER_REGISTRY = 'asia-south1-docker.pkg.dev/your-project-id/your-repository'  
-        DOCKER_IMAGE_NAME = 'your-image-name'  
+        GKE_CLUSTER_NAME = 'your-gke-cluster-name'  // Replace with your GKE cluster name
+        GKE_PROJECT = 'your-gke-project-id'  // Replace with your GKE project ID
+        GKE_ZONE = 'us-central1-a'  // Replace with your GKE cluster zone
+        DOCKER_REGISTRY = 'asia-south1-docker.pkg.dev/your-project-id/your-repository'  // Replace with your Artifact Registry URL
+        DOCKER_IMAGE_NAME = 'your-image-name'  // Replace with your Docker image name
     }
 
     stages {
@@ -33,11 +33,19 @@ spec:
       command:
         - cat
       tty: true
+      volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
   '''
                 }
             }
             steps {
-                checkout scm
+                checkout scm  // Checkout the repository to Jenkins workspace
             }
         }
 
@@ -59,18 +67,25 @@ spec:
         - cat
       tty: true
     - name: docker
-      image: docker:19.03.12
+      image: docker:19.03.12  # Docker-in-Docker image
       privileged: true
       command:
         - cat
       tty: true
+      volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
   '''
                 }
             }
             steps {
                 container('node') {
                     script {
-                        // Navigate to the correct directory if necessary
                         dir('hello-world-nextjs') {
                             sh 'npm install'  // Install dependencies using npm
                         }
@@ -97,18 +112,26 @@ spec:
         - cat
       tty: true
     - name: docker
-      image: docker:19.03.12
+      image: docker:19.03.12  # Docker-in-Docker image
       privileged: true
       command:
         - cat
       tty: true
+      volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
   '''
                 }
             }
             steps {
                 container('docker') {
                     script {
-                        // Build the Docker image
+                        // Build the Docker image using the mounted Docker socket
                         sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1 ./hello-world-nextjs"
                     }
                 }
@@ -133,11 +156,19 @@ spec:
         - cat
       tty: true
     - name: docker
-      image: docker:19.03.12
+      image: docker:19.03.12  # Docker-in-Docker image
       privileged: true
       command:
         - cat
       tty: true
+      volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
   '''
                 }
             }
@@ -169,11 +200,19 @@ spec:
         - cat
       tty: true
     - name: docker
-      image: docker:19.03.12
+      image: docker:19.03.12  # Docker-in-Docker image
       privileged: true
       command:
         - cat
       tty: true
+      volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
   '''
                 }
             }
