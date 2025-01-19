@@ -1,5 +1,27 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            label 'nextjs-pod' 
+            defaultContainer 'node'
+            yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nextjs-pod
+spec:
+  containers:
+    - name: node
+      image: node:16 # Ensure Node.js is available for your build
+      command:
+        - cat
+      tty: true
+    - name: docker
+      image: docker:latest
+      command:
+        - cat
+      tty: true
+  '''
+    }
     environment {
         REGISTRY = "us-central1-docker.pkg.dev/burner-ganprasa2/lloyds-repo"
         IMAGE_NAME = "hello-world-nextjs"
@@ -13,30 +35,39 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                script {
-                    sh 'npm install'
+                container('node') {
+                    script {
+                        sh 'npm install'
+                    }
                 }
             }
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                container('docker') {
+                    script {
+                        sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    }
                 }
             }
         }
         stage('Push Docker Image') {
             steps {
-                script {
-                    sh "docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                container('docker') {
+                    script {
+                        sh "docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    }
                 }
             }
         }
         stage('Deploy to GKE') {
             steps {
-                script {
-                    sh 'kubectl apply -f kubernetes/deployment.yaml'
-                    sh 'kubectl apply -f kubernetes/service.yaml'
+                container('docker') {
+                    script {
+                        // Update the Kubernetes deployment and service files accordingly
+                        sh 'kubectl apply -f kubernetes/deployment.yaml'
+                        sh 'kubectl apply -f kubernetes/service.yaml'
+                    }
                 }
             }
         }
