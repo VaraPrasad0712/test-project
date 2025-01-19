@@ -4,19 +4,11 @@ pipeline {
         REGISTRY = "us-central1-docker.pkg.dev/burner-ganprasa2/lloyds-repo"
         IMAGE_NAME = "hello-world-nextjs"
         IMAGE_TAG = "v1"
-        SONARQUBE = "sonarqube"
     }
     stages {
         stage('Clone Repository') {
             steps {
                 checkout scm
-            }
-        }
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    sh "docker run --rm -e SONAR_HOST_URL=${SONARQUBE} -v $(pwd):/usr/src sonarsource/sonar-scanner-cli"
-                }
             }
         }
         stage('Install Dependencies') {
