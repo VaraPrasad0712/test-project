@@ -1,6 +1,14 @@
 pipeline {
     agent none  // No default agent, we will specify Kubernetes agent below
 
+    environment {
+        GKE_CLUSTER_NAME = 'your-gke-cluster-name'  // Replace with your GKE cluster name
+        GKE_PROJECT = 'your-gke-project-id'  // Replace with your GKE project ID
+        GKE_ZONE = 'us-central1-a'  // Replace with your GKE cluster zone
+        DOCKER_REGISTRY = 'asia-south1-docker.pkg.dev/your-project-id/your-repository'  // Replace with your Artifact Registry URL
+        DOCKER_IMAGE_NAME = 'your-image-name'  // Replace with your Docker image name
+    }
+
     stages {
         stage('Clone Repository') {
             agent {
@@ -15,12 +23,12 @@ metadata:
 spec:
   containers:
     - name: node
-      image: node:16  // Node.js container for building Next.js project
+      image: node:16
       command:
         - cat
       tty: true
     - name: docker
-      image: docker:latest  // Docker container to build and push the image
+      image: docker:latest
       command:
         - cat
       tty: true
@@ -45,7 +53,7 @@ metadata:
 spec:
   containers:
     - name: node
-      image: node:16  // Node.js container to install dependencies
+      image: node:16
       command:
         - cat
       tty: true
@@ -74,12 +82,12 @@ metadata:
 spec:
   containers:
     - name: node
-      image: node:16  // Node.js container for the build process
+      image: node:16
       command:
         - cat
       tty: true
     - name: docker
-      image: docker:latest  // Docker container for Docker build and push
+      image: docker:latest
       command:
         - cat
       tty: true
@@ -89,7 +97,7 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        sh 'docker build -t myregistry/nextjs-app:v1 .'  // Build Docker image
+                        sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1 ."  // Build Docker image
                     }
                 }
             }
@@ -108,12 +116,12 @@ metadata:
 spec:
   containers:
     - name: node
-      image: node:16  // Node.js container (if needed)
+      image: node:16
       command:
         - cat
       tty: true
     - name: docker
-      image: docker:latest  // Docker container to push the built image
+      image: docker:latest
       command:
         - cat
       tty: true
@@ -123,7 +131,7 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        sh 'docker push myregistry/nextjs-app:v1'  // Push the Docker image to the registry
+                        sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1"  // Push the Docker image to Artifact Registry
                     }
                 }
             }
@@ -142,12 +150,12 @@ metadata:
 spec:
   containers:
     - name: node
-      image: node:16  // Node.js container
+      image: node:16
       command:
         - cat
       tty: true
     - name: docker
-      image: docker:latest  // Docker container to deploy the image
+      image: docker:latest
       command:
         - cat
       tty: true
@@ -157,7 +165,8 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        // Apply the Kubernetes deployment and service for the Next.js app
+                        // Apply Kubernetes deployment and service for the Next.js app
+                        sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --zone ${GKE_ZONE} --project ${GKE_PROJECT}"
                         sh 'kubectl apply -f kubernetes/deployment.yaml'
                         sh 'kubectl apply -f kubernetes/service.yaml'
                     }
