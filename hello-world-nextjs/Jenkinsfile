@@ -1,5 +1,5 @@
 pipeline {
-    agent {
+    agent { 
         kubernetes {
             label 'nextjs-pod' 
             defaultContainer 'node'
@@ -72,5 +72,4 @@ spec:
             }
         }
     }
-}
 }
