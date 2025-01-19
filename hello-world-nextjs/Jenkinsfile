@@ -1,12 +1,12 @@
 pipeline {
-    agent none  // No default agent, we will specify Kubernetes agent below
+    agent none
 
     environment {
-        GKE_CLUSTER_NAME = 'your-gke-cluster-name'  // Replace with your GKE cluster name
-        GKE_PROJECT = 'your-gke-project-id'  // Replace with your GKE project ID
-        GKE_ZONE = 'us-central1-a'  // Replace with your GKE cluster zone
-        DOCKER_REGISTRY = 'asia-south1-docker.pkg.dev/your-project-id/your-repository'  // Replace with your Artifact Registry URL
-        DOCKER_IMAGE_NAME = 'your-image-name'  // Replace with your Docker image name
+        GKE_CLUSTER_NAME = 'your-gke-cluster-name'  
+        GKE_PROJECT = 'your-gke-project-id'  
+        GKE_ZONE = 'us-central1-a'  
+        DOCKER_REGISTRY = 'asia-south1-docker.pkg.dev/your-project-id/your-repository'  
+        DOCKER_IMAGE_NAME = 'your-image-name'  
     }
 
     stages {
@@ -28,7 +28,8 @@ spec:
         - cat
       tty: true
     - name: docker
-      image: docker:latest
+      image: docker:19.03.12  # Docker-in-Docker image
+      privileged: true
       command:
         - cat
       tty: true
@@ -36,7 +37,7 @@ spec:
                 }
             }
             steps {
-                checkout scm  // Checkout the repository to Jenkins workspace
+                checkout scm
             }
         }
 
@@ -57,13 +58,22 @@ spec:
       command:
         - cat
       tty: true
+    - name: docker
+      image: docker:19.03.12
+      privileged: true
+      command:
+        - cat
+      tty: true
   '''
                 }
             }
             steps {
                 container('node') {
                     script {
-                        sh 'cd hello-world-nextjs && npm install'  // Install dependencies using npm
+                        // Navigate to the correct directory if necessary
+                        dir('hello-world-nextjs') {
+                            sh 'npm install'  // Install dependencies using npm
+                        }
                     }
                 }
             }
@@ -87,7 +97,8 @@ spec:
         - cat
       tty: true
     - name: docker
-      image: docker:latest
+      image: docker:19.03.12
+      privileged: true
       command:
         - cat
       tty: true
@@ -97,7 +108,8 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1 ."  // Build Docker image
+                        // Build the Docker image
+                        sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1 ./hello-world-nextjs"
                     }
                 }
             }
@@ -121,7 +133,8 @@ spec:
         - cat
       tty: true
     - name: docker
-      image: docker:latest
+      image: docker:19.03.12
+      privileged: true
       command:
         - cat
       tty: true
@@ -131,7 +144,8 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1"  // Push the Docker image to Artifact Registry
+                        // Push Docker image to Artifact Registry
+                        sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1"
                     }
                 }
             }
@@ -155,7 +169,8 @@ spec:
         - cat
       tty: true
     - name: docker
-      image: docker:latest
+      image: docker:19.03.12
+      privileged: true
       command:
         - cat
       tty: true
@@ -165,7 +180,7 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        // Apply Kubernetes deployment and service for the Next.js app
+                        // Deploy to Google Kubernetes Engine (GKE)
                         sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --zone ${GKE_ZONE} --project ${GKE_PROJECT}"
                         sh 'kubectl apply -f kubernetes/deployment.yaml'
                         sh 'kubectl apply -f kubernetes/service.yaml'
