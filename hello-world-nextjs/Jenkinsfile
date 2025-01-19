@@ -1,9 +1,13 @@
 pipeline {
-    agent {
-        kubernetes {
-            label 'nextjs-pod' 
-            defaultContainer 'node'
-            yaml '''
+    agent none  // No default agent, we will specify Kubernetes agent below
+
+    stages {
+        stage('Clone Repository') {
+            agent {
+                kubernetes {
+                    label 'nextjs-pod'
+                    defaultContainer 'node'
+                    yaml '''
 apiVersion: v1
 kind: Pod
 metadata:
@@ -11,60 +15,149 @@ metadata:
 spec:
   containers:
     - name: node
-      image: node:16
+      image: node:16  // Node.js container for building Next.js project
       command:
         - cat
       tty: true
     - name: docker
-      image: docker:latest
+      image: docker:latest  // Docker container to build and push the image
       command:
         - cat
       tty: true
   '''
-    }
-    environment {
-        REGISTRY = "us-central1-docker.pkg.dev/burner-ganprasa2/lloyds-repo"
-        IMAGE_NAME = "hello-world-nextjs"
-        IMAGE_TAG = "v1"
-    }
-    stages {
-        stage('Clone Repository') {
+                }
+            }
             steps {
-                checkout scm
+                checkout scm  // Checkout the repository to Jenkins workspace
             }
         }
+
         stage('Install Dependencies') {
+            agent {
+                kubernetes {
+                    label 'nextjs-pod'
+                    defaultContainer 'node'
+                    yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nextjs-pod
+spec:
+  containers:
+    - name: node
+      image: node:16  // Node.js container to install dependencies
+      command:
+        - cat
+      tty: true
+  '''
+                }
+            }
             steps {
                 container('node') {
                     script {
-                        sh 'npm install'
+                        sh 'npm install'  // Install dependencies using npm
                     }
                 }
             }
         }
+
         stage('Build Docker Image') {
+            agent {
+                kubernetes {
+                    label 'nextjs-pod'
+                    defaultContainer 'docker'
+                    yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nextjs-pod
+spec:
+  containers:
+    - name: node
+      image: node:16  // Node.js container for the build process
+      command:
+        - cat
+      tty: true
+    - name: docker
+      image: docker:latest  // Docker container for Docker build and push
+      command:
+        - cat
+      tty: true
+  '''
+                }
+            }
             steps {
                 container('docker') {
                     script {
-                        sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                        sh 'docker build -t myregistry/nextjs-app:v1 .'  // Build Docker image
                     }
                 }
             }
         }
+
         stage('Push Docker Image') {
+            agent {
+                kubernetes {
+                    label 'nextjs-pod'
+                    defaultContainer 'docker'
+                    yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nextjs-pod
+spec:
+  containers:
+    - name: node
+      image: node:16  // Node.js container (if needed)
+      command:
+        - cat
+      tty: true
+    - name: docker
+      image: docker:latest  // Docker container to push the built image
+      command:
+        - cat
+      tty: true
+  '''
+                }
+            }
             steps {
                 container('docker') {
                     script {
-                        sh "docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                        sh 'docker push myregistry/nextjs-app:v1'  // Push the Docker image to the registry
                     }
                 }
             }
         }
+
         stage('Deploy to GKE') {
+            agent {
+                kubernetes {
+                    label 'nextjs-pod'
+                    defaultContainer 'docker'
+                    yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nextjs-pod
+spec:
+  containers:
+    - name: node
+      image: node:16  // Node.js container
+      command:
+        - cat
+      tty: true
+    - name: docker
+      image: docker:latest  // Docker container to deploy the image
+      command:
+        - cat
+      tty: true
+  '''
+                }
+            }
             steps {
                 container('docker') {
                     script {
-                        // Update the Kubernetes deployment and service files accordingly
+                        // Apply the Kubernetes deployment and service for the Next.js app
                         sh 'kubectl apply -f kubernetes/deployment.yaml'
                         sh 'kubectl apply -f kubernetes/service.yaml'
                     }
@@ -72,5 +165,4 @@ spec:
             }
         }
     }
-}
 }
