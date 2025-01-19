@@ -63,7 +63,7 @@ spec:
             steps {
                 container('node') {
                     script {
-                        sh 'npm install'  // Install dependencies using npm
+                        sh 'cd hello-world-nextjs && npm install'  // Install dependencies using npm
                     }
                 }
             }
