@@ -15,7 +15,7 @@ pipeline {
                 kubernetes {
                     label 'nextjs-pod'
                     defaultContainer 'node'
-                    yamlFile 'pipeline/agent.yaml' // Use an external YAML file for simplicity
+                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml' // Use an external YAML file for simplicity
                 }
             }
             steps {
@@ -29,7 +29,7 @@ pipeline {
                 kubernetes {
                     label 'nextjs-pod'
                     defaultContainer 'node'
-                    yamlFile 'pipeline/agent.yaml' // Reuse the same YAML configuration
+                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml' // Reuse the same YAML configuration
                 }
             }
             steps {
@@ -47,7 +47,7 @@ pipeline {
                 kubernetes {
                     label 'nextjs-pod'
                     defaultContainer 'gcloud-sdk'
-                    yamlFile 'pipeline/agent.yaml' // Reuse YAML for simplicity
+                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml' // Reuse YAML for simplicity
                 }
             }
             steps {
@@ -64,7 +64,7 @@ pipeline {
                 kubernetes {
                     label 'nextjs-pod'
                     defaultContainer 'docker'
-                    yamlFile 'pipeline/agent.yaml' // Reuse YAML
+                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml' // Reuse YAML
                 }
             }
             steps {
@@ -80,7 +80,7 @@ pipeline {
                 kubernetes {
                     label 'nextjs-pod'
                     defaultContainer 'docker'
-                    yamlFile 'pipeline/agent.yaml'
+                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml'
                 }
             }
             steps {
@@ -96,7 +96,7 @@ pipeline {
                 kubernetes {
                     label 'nextjs-pod'
                     defaultContainer 'gcloud-sdk'
-                    yamlFile 'pipeline/agent.yaml'
+                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml'
                 }
             }
             steps {
