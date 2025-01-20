@@ -6,37 +6,16 @@ spec:
   containers:
     - name: gcloud
       image: 'google/cloud-sdk:latest'
-      resources:
-        requests:
-          memory: 256Mi  # 256MB memory
-          cpu: 200m      # 200m CPU
-        limits:
-          memory: 512Mi  # 512MB memory
-          cpu: 400m      # 400m CPU
 
     - name: docker
       image: 'docker:19.03.12'
       privileged: true
-      resources:
-        requests:
-          memory: 256Mi  # 256MB memory
-          cpu: 200m      # 200m CPU
-        limits:
-          memory: 512Mi  # 512MB memory
-          cpu: 400m      # 400m CPU
       volumeMounts:
         - name: docker-socket
           mountPath: /var/run/docker.sock
 
     - name: node
       image: 'node:16'
-      resources:
-        requests:
-          memory: 256Mi  # 512MB memory
-          cpu: 200m      # 500m CPU
-        limits:
-          memory: 1Gi    # 1GB memory
-          cpu: 1          # 1 CPU
       command:
         - cat
       tty: true
