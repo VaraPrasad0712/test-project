@@ -13,36 +13,8 @@ pipeline {
         stage('Clone Repository') {
             agent {
                 kubernetes {
-                    label 'nextjs-pod'
+                    label 'default'  // Use the default Kubernetes pod template defined in your cloud setup
                     defaultContainer 'node'
-                    yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nextjs-pod
-spec:
-  serviceAccountName: jenkins-service-account
-  containers:
-    - name: node
-      image: node:16
-      command:
-        - cat
-      tty: true
-    - name: docker
-      image: docker:19.03.12  # Docker-in-Docker image
-      privileged: true
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-  volumes:
-    - name: docker-socket
-      hostPath:
-        path: /var/run/docker.sock
-        type: Socket
-  '''
                 }
             }
             steps {
@@ -53,36 +25,8 @@ spec:
         stage('Install Dependencies') {
             agent {
                 kubernetes {
-                    label 'nextjs-pod'
+                    label 'default'  // Use the default Kubernetes pod template defined in your cloud setup
                     defaultContainer 'node'
-                    yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nextjs-pod
-spec:
-  serviceAccountName: jenkins-service-account
-  containers:
-    - name: node
-      image: node:16
-      command:
-        - cat
-      tty: true
-    - name: docker
-      image: docker:19.03.12  # Docker-in-Docker image
-      privileged: true
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-  volumes:
-    - name: docker-socket
-      hostPath:
-        path: /var/run/docker.sock
-        type: Socket
-  '''
                 }
             }
             steps {
@@ -96,37 +40,11 @@ spec:
             }
         }
 
-
         stage('Authenticate with Artifact Registry') {
             agent {
                 kubernetes {
-                    label 'nextjs-pod'
+                    label 'default'  // Use the default Kubernetes pod template defined in your cloud setup
                     defaultContainer 'gcloud-sdk'
-                    yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nextjs-pod
-spec:
-  serviceAccountName: jenkins-service-account
-  containers:
-    - name: node
-      image: node:16
-      command:
-        - cat
-      tty: true
-    - name: docker
-      image: docker:19.03.12
-      privileged: true
-      command:
-        - cat
-      tty: true
-    - name: gcloud-sdk
-      image: google/cloud-sdk:slim
-      command:
-        - cat
-      tty: true
-  '''
                 }
             }
             steps {
@@ -141,40 +59,11 @@ spec:
             }
         }
 
-        
         stage('Build Docker Image') {
             agent {
                 kubernetes {
-                    label 'nextjs-pod'
+                    label 'default'  // Use the default Kubernetes pod template defined in your cloud setup
                     defaultContainer 'docker'
-                    yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nextjs-pod
-spec:
-  serviceAccountName: jenkins-service-account
-  containers:
-    - name: node
-      image: node:16
-      command:
-        - cat
-      tty: true
-    - name: docker
-      image: docker:19.03.12  # Docker-in-Docker image
-      privileged: true
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-  volumes:
-    - name: docker-socket
-      hostPath:
-        path: /var/run/docker.sock
-        type: Socket
-  '''
                 }
             }
             steps {
@@ -190,36 +79,8 @@ spec:
         stage('Push Docker Image') {
             agent {
                 kubernetes {
-                    label 'nextjs-pod'
+                    label 'default'  // Use the default Kubernetes pod template defined in your cloud setup
                     defaultContainer 'docker'
-                    yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nextjs-pod
-spec:
-  serviceAccountName: jenkins-service-account
-  containers:
-    - name: node
-      image: node:16
-      command:
-        - cat
-      tty: true
-    - name: docker
-      image: docker:19.03.12  # Docker-in-Docker image
-      privileged: true
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-  volumes:
-    - name: docker-socket
-      hostPath:
-        path: /var/run/docker.sock
-        type: Socket
-  '''
                 }
             }
             steps {
@@ -235,36 +96,8 @@ spec:
         stage('Deploy to GKE') {
             agent {
                 kubernetes {
-                    label 'nextjs-pod'
+                    label 'default'  // Use the default Kubernetes pod template defined in your cloud setup
                     defaultContainer 'docker'
-                    yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nextjs-pod
-spec:
-  serviceAccountName: jenkins-service-account
-  containers:
-    - name: node
-      image: node:16
-      command:
-        - cat
-      tty: true
-    - name: docker
-      image: docker:19.03.12  # Docker-in-Docker image
-      privileged: true
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-  volumes:
-    - name: docker-socket
-      hostPath:
-        path: /var/run/docker.sock
-        type: Socket
-  '''
                 }
             }
             steps {
