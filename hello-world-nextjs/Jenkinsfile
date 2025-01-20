@@ -1,110 +1,72 @@
 pipeline {
-    agent none // No default agent, specific agents are defined for each stage
-
-    environment {
-        GKE_CLUSTER_NAME = 'lloyds-cluster-clone-1-clone-1' // Replace with your GKE cluster name
-        GKE_PROJECT = 'burner-ganprasa2' // Replace with your GKE project ID
-        GKE_ZONE = 'us-central1-a' // Replace with your GKE cluster zone
-        DOCKER_REGISTRY = 'us-central1-docker.pkg.dev/burner-ganprasa2/lloyds-repo' // Replace with your Artifact Registry URL
-        DOCKER_IMAGE_NAME = 'first-image' // Replace with your Docker image name
+    agent {
+        kubernetes {
+            label "agent-${UUID.randomUUID().toString()}"
+            yamlFile "pipelines/agent.yaml"  // Referencing the YAML file in the pipeline
+        }
     }
-
+    environment {
+        GKE_CLUSTER_NAME = 'lloyds-cluster-clone-1-clone-1' 
+        GKE_PROJECT = 'burner-ganprasa2'  
+        GKE_ZONE = 'us-central1-a' 
+        DOCKER_REGISTRY = 'us-central1-docker.pkg.dev/burner-ganprasa2/lloyds-repo' 
+        DOCKER_IMAGE_NAME = 'first-image' 
+    }
     stages {
         stage('Clone Repository') {
-            agent {
-                kubernetes {
-                    label 'nextjs-pod'
-                    defaultContainer 'node'
-                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml' // Use an external YAML file for simplicity
-                }
-            }
             steps {
-                echo 'Cloning repository...'
                 checkout scm
             }
         }
-
         stage('Install Dependencies') {
-            agent {
-                kubernetes {
-                    label 'nextjs-pod'
-                    defaultContainer 'node'
-                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml' // Reuse the same YAML configuration
-                }
-            }
             steps {
-                echo 'Installing dependencies...'
                 container('node') {
-                    dir('hello-world-nextjs') {
-                        sh 'npm install'
+                    script {
+                        dir('hello-world-nextjs') {
+                            sh 'npm install' 
+                        }
                     }
                 }
             }
         }
-
         stage('Authenticate with Artifact Registry') {
-            agent {
-                kubernetes {
-                    label 'nextjs-pod'
-                    defaultContainer 'gcloud-sdk'
-                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml' // Reuse YAML for simplicity
-                }
-            }
             steps {
-                echo 'Authenticating with Artifact Registry...'
                 withCredentials([file(credentialsId: 'gcp-artifact-registry-key', variable: 'GCLOUD_SERVICE_KEY')]) {
-                    sh 'gcloud auth activate-service-account --key-file=$GCLOUD_SERVICE_KEY'
-                    sh 'gcloud auth configure-docker us-central1-docker.pkg.dev'
+                    container('gcloud') {
+                        script {
+                            sh 'gcloud auth activate-service-account --key-file=$GCLOUD_SERVICE_KEY'
+                            sh 'gcloud auth configure-docker us-central1-docker.pkg.dev'
+                        }
+                    }
                 }
             }
         }
-
         stage('Build Docker Image') {
-            agent {
-                kubernetes {
-                    label 'nextjs-pod'
-                    defaultContainer 'docker'
-                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml' // Reuse YAML
-                }
-            }
             steps {
-                echo 'Building Docker image...'
                 container('docker') {
-                    sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1 ./hello-world-nextjs"
+                    script {
+                        sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1 ./hello-world-nextjs"
+                    }
                 }
             }
         }
-
         stage('Push Docker Image') {
-            agent {
-                kubernetes {
-                    label 'nextjs-pod'
-                    defaultContainer 'docker'
-                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml'
-                }
-            }
             steps {
-                echo 'Pushing Docker image to Artifact Registry...'
                 container('docker') {
-                    sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1"
+                    script {
+                        sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:v1"
+                    }
                 }
             }
         }
-
         stage('Deploy to GKE') {
-            agent {
-                kubernetes {
-                    label 'nextjs-pod'
-                    defaultContainer 'gcloud-sdk'
-                    yamlFile 'hello-world-nextjs/pipeline/agent.yaml'
-                }
-            }
             steps {
-                echo 'Deploying to GKE...'
-                container('gcloud-sdk') {
-                    sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --zone ${GKE_ZONE} --project ${GKE_PROJECT}"
-                    sh 'kubectl apply -f kubernetes/deployment.yaml'
-                    sh 'kubectl apply -f kubernetes/service.yaml'
+                container('gcloud') {
+                    script {
+                        sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --zone ${GKE_ZONE} --project ${GKE_PROJECT}"
+                        sh 'kubectl apply -f kubernetes/deployment.yaml'
+                        sh 'kubectl apply -f kubernetes/service.yaml'
+                    }
                 }
             }
         }
