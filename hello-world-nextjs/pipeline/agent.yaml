@@ -9,7 +9,7 @@ spec:
       resources:
         requests:
           memory: 512Mi  # 512MB memory
-          cpu: 500m      # 500m CPU
+          cpu: 256m      # 500m CPU
         limits:
           memory: 1Gi    # 1GB memory
           cpu: 1          # 1 CPU
@@ -42,7 +42,7 @@ spec:
       image: 'node:16'
       resources:
         requests:
-          memory: 512Mi  # 512MB memory
+          memory: 256Mi  # 512MB memory
           cpu: 500m      # 500m CPU
         limits:
           memory: 1Gi    # 1GB memory
