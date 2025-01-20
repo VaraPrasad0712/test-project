@@ -16,6 +16,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 checkout scm
+                sh 'ls -R'  // Verify that all files are present
             }
         }
         stage('Install Dependencies') {
