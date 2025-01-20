@@ -99,7 +99,7 @@ spec:
             agent {
                 kubernetes {
                     label 'nextjs-pod'
-                    defaultContainer 'docker'
+                    defaultContainer 'gcloud-sdk'
                     yaml '''
 apiVersion: v1
 kind: Pod
@@ -115,6 +115,11 @@ spec:
     - name: docker
       image: docker:19.03.12
       privileged: true
+      command:
+        - cat
+      tty: true
+    - name: gcloud-sdk
+      image: google/cloud-sdk:slim
       command:
         - cat
       tty: true
