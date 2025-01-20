@@ -18,6 +18,17 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Install Dependencies') {
+            steps {
+                container('node') {
+                    script {
+                        dir('hello-world-nextjs') {
+                            sh 'npm install' 
+                        }
+                    }
+                }
+            }
+        }
         stage('Authenticate with Artifact Registry') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-artifact-registry-key', variable: 'GCLOUD_SERVICE_KEY')]) {
