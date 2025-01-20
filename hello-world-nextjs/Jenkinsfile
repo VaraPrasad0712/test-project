@@ -21,6 +21,7 @@ kind: Pod
 metadata:
   name: nextjs-pod
 spec:
+  serviceAccountName: jenkins-service-account
   containers:
     - name: node
       image: node:16
@@ -60,6 +61,7 @@ kind: Pod
 metadata:
   name: nextjs-pod
 spec:
+  serviceAccountName: jenkins-service-account
   containers:
     - name: node
       image: node:16
@@ -106,6 +108,7 @@ kind: Pod
 metadata:
   name: nextjs-pod
 spec:
+  serviceAccountName: jenkins-service-account
   containers:
     - name: node
       image: node:16
@@ -150,6 +153,7 @@ kind: Pod
 metadata:
   name: nextjs-pod
 spec:
+  serviceAccountName: jenkins-service-account
   containers:
     - name: node
       image: node:16
@@ -194,6 +198,7 @@ kind: Pod
 metadata:
   name: nextjs-pod
 spec:
+  serviceAccountName: jenkins-service-account
   containers:
     - name: node
       image: node:16
@@ -238,6 +243,7 @@ kind: Pod
 metadata:
   name: nextjs-pod
 spec:
+  serviceAccountName: jenkins-service-account
   containers:
     - name: node
       image: node:16
