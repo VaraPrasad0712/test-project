@@ -8,11 +8,11 @@ spec:
       image: 'jenkins/inbound-agent:latest'
       resources:
         requests:
-          memory: 512Mi
-          cpu: 500m
+          memory: 256Mi  # Reduced from 512Mi
+          cpu: 250m      # Reduced from 500m
         limits:
-          memory: 1024Mi
-          cpu: 1000m
+          memory: 512Mi  # Reduced from 1024Mi
+          cpu: 500m      # Reduced from 1000m
       volumeMounts:
         - name: docker-socket
           mountPath: /var/run/docker.sock
@@ -20,21 +20,21 @@ spec:
       image: 'google/cloud-sdk:latest'
       resources:
         requests:
-          memory: 512Mi
-          cpu: 500m
+          memory: 128Mi  # Reduced from 512Mi
+          cpu: 150m      # Reduced from 500m
         limits:
-          memory: 1024Mi
-          cpu: 1000m
+          memory: 256Mi  # Reduced from 1024Mi
+          cpu: 300m      # Reduced from 1000m
     - name: docker
       image: 'docker:19.03.12'
       privileged: true
       resources:
         requests:
-          memory: 512Mi
-          cpu: 500m
+          memory: 128Mi  # Reduced from 512Mi
+          cpu: 150m      # Reduced from 500m
         limits:
-          memory: 1024Mi
-          cpu: 1000m
+          memory: 256Mi  # Reduced from 1024Mi
+          cpu: 300m      # Reduced from 1000m
       volumeMounts:
         - name: docker-socket
           mountPath: /var/run/docker.sock
@@ -42,11 +42,11 @@ spec:
       image: 'node:16'
       resources:
         requests:
-          memory: 512Mi
-          cpu: 500m
+          memory: 256Mi  # Reduced from 512Mi
+          cpu: 250m      # Reduced from 500m
         limits:
-          memory: 1024Mi
-          cpu: 1000m
+          memory: 512Mi  # Reduced from 1024Mi
+          cpu: 500m      # Reduced from 1000m
       command:
         - cat
       tty: true
