@@ -6,50 +6,22 @@ spec:
   containers:
     - name: jenkins-agent
       image: 'jenkins/inbound-agent:latest'
-      resources:
-        requests:
-          memory: 256Mi  # Reduced from 512Mi
-          cpu: 250m      # Reduced from 500m
-        limits:
-          memory: 512Mi  # Reduced from 1024Mi
-          cpu: 500m      # Reduced from 1000m
-      volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
     - name: gcloud
       image: 'google/cloud-sdk:latest'
-      resources:
-        requests:
-          memory: 128Mi  # Reduced from 512Mi
-          cpu: 150m      # Reduced from 500m
-        limits:
-          memory: 256Mi  # Reduced from 1024Mi
-          cpu: 300m      # Reduced from 1000m
     - name: docker
       image: 'docker:19.03.12'
       privileged: true
-      resources:
-        requests:
-          memory: 128Mi  # Reduced from 512Mi
-          cpu: 150m      # Reduced from 500m
-        limits:
-          memory: 256Mi  # Reduced from 1024Mi
-          cpu: 300m      # Reduced from 1000m
       volumeMounts:
         - name: docker-socket
           mountPath: /var/run/docker.sock
     - name: node
       image: 'node:16'
-      resources:
-        requests:
-          memory: 256Mi  # Reduced from 512Mi
-          cpu: 250m      # Reduced from 500m
-        limits:
-          memory: 512Mi  # Reduced from 1024Mi
-          cpu: 500m      # Reduced from 1000m
       command:
         - cat
       tty: true
+      volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
   volumes:
     - name: docker-socket
       hostPath:
