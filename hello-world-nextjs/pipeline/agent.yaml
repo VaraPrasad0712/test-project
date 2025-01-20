@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: gcloud
-      image: 'ggoogle/cloud-sdk:slim'
+      image: 'google/cloud-sdk:slim'
 
     - name: docker
       image: 'docker:19.03.12'
